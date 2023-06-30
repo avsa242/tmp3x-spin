@@ -20,16 +20,16 @@ P1/SPIN1:
 P2/SPIN2:
 * p2-spin-standard-library
 * an external ADC and driver (see the p2-spin-standard-library for signal.adc. drivers)
-
+* or the P2 smart pins can be used in ADC mode (signal.adc.p2x8c4m64p.spin2 driver)
 
 ## Compiler Compatibility
 
 | Processor | Language | Compiler               | Backend      | Status                |
 |-----------|----------|------------------------|--------------|-----------------------|
-| P1	    | SPIN1    | FlexSpin (6.1.1)	| Bytecode     | OK                    |
-| P1	    | SPIN1    | FlexSpin (6.1.1)       | Native/PASM  | OK                    |
-| P2	    | SPIN2    | FlexSpin (6.1.1)       | NuCode       | Not yet implemented   |
-| P2        | SPIN2    | FlexSpin (6.1.1)       | Native/PASM2 | Not yet implemented   |
+| P1        | SPIN1    | FlexSpin (6.1.1)	| Bytecode     | OK                    |
+| P1        | SPIN1    | FlexSpin (6.1.1)       | Native/PASM  | OK                    |
+| P2        | SPIN2    | FlexSpin (6.1.1)       | ~~NuCode~~   | FTBFS                 |
+| P2        | SPIN2    | FlexSpin (6.1.1)       | Native/PASM2 | OK                    |
 
 (other versions or toolchains not listed are __not supported__, and _may or may not_ work)
 
@@ -38,7 +38,7 @@ P2/SPIN2:
 
 * Tested with sensor: TMP36
 * Tested with ADCs: MCP3202, ADS1115
-
+* Tested with P2 smartpin-based ADC (basic functionality only)
 
 ## Limitations
 
