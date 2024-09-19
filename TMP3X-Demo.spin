@@ -1,105 +1,86 @@
 {
-    --------------------------------------------
-    Filename: TMP3X-Demo.spin
-    Author: Jesse Burt
-    Description: Demo of the TMP3x-series analog temperature sensor driver
+----------------------------------------------------------------------------------------------------
+    Filename:       TMP3X-Demo.spin
+    Description:    Demo of the TMP3x-series analog temperature sensor driver
         * Temperature output
-    Copyright (c) 2023
-    Started Jun 30, 2023
-    Updated Jun 30, 2023
-    See end of file for terms of use.
-    --------------------------------------------
+    Author:         Jesse Burt
+    Started:        Jun 30, 2023
+    Updated:        Sep 19, 2024
+    Copyright (c) 2024 - See end of file for terms of use.
+----------------------------------------------------------------------------------------------------
 
-    Usage:
-
-    The preprocessor symbol TMP3X_ADC must be defined with the filename of the driver of
+    NOTE: The preprocessor symbol TMP3X_ADC must be defined with the filename of the driver of
         the connected ADC (.spin extension optional).
-
-    Examples:
-        To build this demo and use an MCP300x/320x-series ADC to read the temperature sensor:
-        flexspin -DTMP3X_ADC=\"signal.adc.mcp320x\" -I$SPIN1_STD_LIB TMP3X-Demo.spin
-
-        The same, but with the ADS1015/ADS1115:
-        flexspin -DTMP3X_ADC=\"signal.adc.ads1115\" -I$SPIN1_STD_LIB TMP3X-Demo.spin
-
-        and an ADC083x:
-        flexspin -DTMP3X_ADC=\"signal.adc.adc083x\" -I$SPIN1_STD_LIB TMP3X-Demo.spin
-
-        Note that it's assumed SPIN1_STD_LIB is an environment variable in your OS defined to the
-            location of 'spin-standard-library/library'. This must be defined as above or any
-            equivalent (the library must be visible to flexspin).
 }
+
+' Uncomment one of the lines below to choose an ADC
+'#define TMP3X_ADC "signal.adc.ad799x"
+'#define TMP3X_ADC "signal.adc.adc083x"
+'#define TMP3X_ADC "signal.adc.adc124s021"
+#define TMP3X_ADC "signal.adc.mcp320x"
+'#define TMP3X_ADC "signal.adc.ads1115"
+
+#ifdef TMP3X_ADC
+# pragma exportdef TMP3X_ADC
+#endif
 
 CON
 
-    _clkmode    = cfg#_clkmode
-    _xinfreq    = cfg#_xinfreq
+    _clkmode    = xtal1+pll16x
+    _xinfreq    = 5_000_000
 
-' -- User-defined constants
-    SER_BAUD    = 115_200
-
-    { I2C ADCs }
-    SCL_PIN     = 28
-    SDA_PIN     = 29
-    I2C_FREQ    = 100_000
-    ADDR_BITS   = 0
-
-    { SPI ADCs }
-    CS_PIN      = 8
-    SCK_PIN     = 9
-    MOSI_PIN    = 10
-    MISO_PIN    = 11
-    SCK_FREQ    = 400_000
-
-' --
 
 OBJ
 
-    cfg:    "boardcfg.flip"
-    ser:    "com.serial.terminal.ansi"
     time:   "time"
-    sensor: "sensor.temperature.tmp3x"
-    adc:    TMP3X_ADC
+    ser:    "com.serial.terminal.ansi" | SER_BAUD=115_200
+    sensor: "sensor.temperature.tmp3x" |
 
-PUB main()
+' uncomment one of the below definitions based on the ADC chosen above
+    'adc:    TMP3X_ADC | {I2C} SCL=28, SDA=29, I2C_FREQ=100_000, I2C_ADDR=0
+    adc:    TMP3X_ADC | {SPI} CS=0, SCK=1, MOSI=2, MISO=3
 
-    ser.start(SER_BAUD)
+
+PUB main() | temp, tscl
+
+    setup()
+    sensor.temp_scale(sensor.C)
+
+    repeat
+        ser.pos_xy(0, 3)
+        temp := sensor.temperature()
+        tscl := lookupz(sensor.temp_scale(-2): "C", "F", "K")
+        ser.printf3(@"Temp. (deg %c): %3.3d.%02.2d\n\r", tscl, (temp / 100), ||(temp // 100))
+
+
+PUB setup()
+
+    ser.start()
     time.msleep(30)
     ser.clear()
     ser.strln(@"Serial terminal started")
 
-
-' -- Uncomment one of the following pairs of lines depending on the connected ADC:
-    { I2C ADCs (ADS1015, 1115) }
-    if ( adc.startx(SCL_PIN, SDA_PIN, I2C_FREQ, ADDR_BITS) )
+    if ( adc.start() )
         ser.strln(@"ADC started")
-
-    { SPI ADCs (MCP300x, MCP320x, ADC083x) }
-'    if ( adc.startx(CS_PIN, SCK_PIN, MOSI_PIN, MISO_PIN, SCK_FREQ) )
-'        ser.strln(@"ADC started")
-' --
     else
         ser.strln(@"ADC failed to start - halting")
         repeat
+
     sensor.start(@adc)                          ' point the driver to your ADC (REQUIRED)
 
     { optional settings (check ADC driver for specific availability) }
-    adc.opmode(adc.CONT)
-    adc.set_adc_channel(0)
-    sensor.temp_scale(sensor.C)
-    'adc.set_model(3202)
-    adc.adc_scale(2_048)                        ' ADS1115: minimum should be 2_048mV scale
+    'adc.opmode(adc.CONT)                        ' enable (continuous) measurement mode
+    'adc.set_model(3202)                         ' MCP320x: set the correct model
+    'adc.adc_scale(2_048)                        ' ADS1115: minimum should be 2_048mV scale
     'sensor.set_sample_averages(64)              ' optional; may improve stability on noisy ADCs
 
-    repeat
-        ser.pos_xy(0, 3)
-        show_temp_data()
+    adc.set_adc_channel(0)                      ' make sure this is the channel the sensor is
+                                                '   connected to
 
-#include "tempdemo.common.spinh"                ' use demo code common to all temp sensors
 
 DAT
 {
-Copyright 2023 Jesse Burt
+Copyright 2024 Jesse Burt
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,

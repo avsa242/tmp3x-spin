@@ -11,6 +11,7 @@ This is a P8X32A/Propeller, P2X8C4M64P/Propeller 2 driver object for the Analog 
 * Read temperature in hundredths of a degree
 * Set number of ADC samples averaged per measurement
 
+
 ## Requirements
 
 P1/SPIN1:
@@ -22,14 +23,15 @@ P2/SPIN2:
 * an external ADC and driver (see the p2-spin-standard-library for signal.adc. drivers)
 * or the P2 smart pins can be used in ADC mode (signal.adc.p2x8c4m64p.spin2 driver)
 
+
 ## Compiler Compatibility
 
 | Processor | Language | Compiler               | Backend      | Status                |
 |-----------|----------|------------------------|--------------|-----------------------|
-| P1        | SPIN1    | FlexSpin (6.1.1)	| Bytecode     | OK                    |
-| P1        | SPIN1    | FlexSpin (6.1.1)       | Native/PASM  | OK                    |
-| P2        | SPIN2    | FlexSpin (6.1.1)       | ~~NuCode~~   | FTBFS                 |
-| P2        | SPIN2    | FlexSpin (6.1.1)       | Native/PASM2 | OK                    |
+| P1        | SPIN1    | FlexSpin (6.9.4)       | Bytecode     | OK                    |
+| P1        | SPIN1    | FlexSpin (6.9.4)       | Native/PASM  | OK                    |
+| P2        | SPIN2    | FlexSpin (6.9.4)       | NuCode       | Untested              |
+| P2        | SPIN2    | FlexSpin (6.9.4)       | Native/PASM2 | OK                    |
 
 (other versions or toolchains not listed are __not supported__, and _may or may not_ work)
 
